@@ -1,0 +1,38 @@
+Resumo da Tabela Analítica Base
+==================================================
+
+Período: 2008 - 2023.0
+Estado: PA
+Municípios únicos: 143
+Total de registros: 2069
+
+Colunas disponíveis:
+- CD_MUN
+- NM_MUN
+- ano
+- desmatamento_km2
+- Área (km²)
+- População 2022
+- PIB per capita 2021
+- Índice de Progresso Social
+- Necessidades Humanas Básicas
+- Fundamentos do Bem-estar
+- Oportunidades
+- ibama_total_autos
+- ibama_valor_total_multas
+- ibama_valor_medio_multas
+- ibama_autos_flora
+- ano_normalizado
+- periodo_presidencial
+- ano_transicao
+- desmatamento_lag1
+- desmatamento_ma3
+- desmatamento_crescimento
+- periodo_presidencial_encoded
+- area_normalizada
+
+Períodos presidenciais incluídos:
+- Lula: 537 registros
+- Dilma: 755 registros
+- Temer: 263 registros
+- Bolsonaro: 514 registros

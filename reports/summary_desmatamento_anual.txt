@@ -1,0 +1,43 @@
+Resumo para a tabela: desmatamento_anual
+==================================================
+
+Dimensões do DataFrame:
+(7304, 5)
+
+Primeiras 5 linhas:
+    CD_MUN                 NM_MUN ESTADO     ano  desmatamento_km2
+0  1100015  Alta Floresta D'Oeste     RO  2008.0         26.525736
+1  1100015  Alta Floresta D'Oeste     RO  2009.0          5.091039
+2  1100015  Alta Floresta D'Oeste     RO  2010.0          1.801177
+3  1100015  Alta Floresta D'Oeste     RO  2011.0          6.878334
+4  1100015  Alta Floresta D'Oeste     RO  2012.0          5.311944
+
+Informações do DataFrame (tipos de dados e nulos):
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 7304 entries, 0 to 7303
+Data columns (total 5 columns):
+ #   Column            Non-Null Count  Dtype  
+---  ------            --------------  -----  
+ 0   CD_MUN            7304 non-null   object 
+ 1   NM_MUN            7304 non-null   object 
+ 2   ESTADO            7304 non-null   object 
+ 3   ano               7304 non-null   float64
+ 4   desmatamento_km2  7304 non-null   float64
+dtypes: float64(2), object(3)
+memory usage: 285.4+ KB
+
+
+Estatísticas Descritivas:
+         CD_MUN      NM_MUN ESTADO          ano  desmatamento_km2
+count      7304        7304   7304  7304.000000      7.304000e+03
+unique      523         519      9          NaN               NaN
+top     5108956  Pau D'Arco     PA          NaN               NaN
+freq         16          32   2069          NaN               NaN
+mean        NaN         NaN    NaN  2015.406490      1.709727e+01
+std         NaN         NaN    NaN     4.643679      4.808887e+01
+min         NaN         NaN    NaN  2008.000000      5.118934e-10
+25%         NaN         NaN    NaN  2011.000000      7.134785e-01
+50%         NaN         NaN    NaN  2015.000000      3.119963e+00
+75%         NaN         NaN    NaN  2019.000000      1.347638e+01
+max         NaN         NaN    NaN  2023.000000      7.984572e+02
+

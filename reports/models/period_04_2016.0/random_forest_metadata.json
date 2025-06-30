@@ -1,0 +1,92 @@
+{
+  "model_type": "random_forest",
+  "period": 4,
+  "test_year": 2016.0,
+  "metrics": {
+    "rmse": 18.389253235205828,
+    "mae": 5.784699333435826,
+    "r2": 0.8910316695176657
+  },
+  "best_params": {
+    "n_estimators": 433,
+    "max_depth": 9,
+    "min_samples_split": 12,
+    "min_samples_leaf": 1,
+    "max_features": null
+  },
+  "timestamp": "2025-06-29T20:33:48.541178",
+  "feature_importance": [
+    [
+      "desmatamento_lag1",
+      0.2085381401396622
+    ],
+    [
+      "desmatamento_ma3",
+      0.19356413632646569
+    ],
+    [
+      "\u00c1rea (km\u00b2)",
+      0.10337716962434136
+    ],
+    [
+      "ibama_autos_flora",
+      0.09568415300279735
+    ],
+    [
+      "area_normalizada",
+      0.09375751621418867
+    ],
+    [
+      "ibama_total_autos",
+      0.06794837763979467
+    ],
+    [
+      "desmatamento_crescimento",
+      0.056901611718035504
+    ],
+    [
+      "ibama_valor_total_multas",
+      0.05636231707036901
+    ],
+    [
+      "ano_normalizado",
+      0.026703867433521045
+    ],
+    [
+      "Necessidades Humanas B\u00e1sicas",
+      0.02550978336797293
+    ],
+    [
+      "\u00cdndice de Progresso Social",
+      0.01606919656061801
+    ],
+    [
+      "ibama_valor_medio_multas",
+      0.014770549546642735
+    ],
+    [
+      "Fundamentos do Bem-estar",
+      0.013260125792428988
+    ],
+    [
+      "Popula\u00e7\u00e3o 2022",
+      0.011932669069654515
+    ],
+    [
+      "PIB per capita 2021",
+      0.00874536940282916
+    ],
+    [
+      "Oportunidades",
+      0.005744364663748574
+    ],
+    [
+      "periodo_presidencial_encoded",
+      0.0010725741602000917
+    ],
+    [
+      "ano_transicao",
+      5.807826672944335e-05
+    ]
+  ]
+}

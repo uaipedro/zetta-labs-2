@@ -1,0 +1,94 @@
+{
+  "model_type": "xgboost",
+  "period": 10,
+  "test_year": 2022.0,
+  "metrics": {
+    "rmse": 16.11517678704288,
+    "mae": 4.82214266810828,
+    "r2": 0.9692694072917729
+  },
+  "best_params": {
+    "n_estimators": 158,
+    "max_depth": 5,
+    "learning_rate": 0.1803914601833953,
+    "subsample": 0.9482268083275318,
+    "colsample_bytree": 0.7925272174614537,
+    "reg_alpha": 6.4874886464238655,
+    "reg_lambda": 3.674972122490901
+  },
+  "timestamp": "2025-06-29T20:43:45.632099",
+  "feature_importance": [
+    [
+      "desmatamento_lag1",
+      0.29318520426750183
+    ],
+    [
+      "area_normalizada",
+      0.17787422239780426
+    ],
+    [
+      "desmatamento_ma3",
+      0.10980349034070969
+    ],
+    [
+      "\u00c1rea (km\u00b2)",
+      0.055288150906562805
+    ],
+    [
+      "desmatamento_crescimento",
+      0.05339920520782471
+    ],
+    [
+      "\u00cdndice de Progresso Social",
+      0.051107797771692276
+    ],
+    [
+      "ibama_autos_flora",
+      0.04966096952557564
+    ],
+    [
+      "Necessidades Humanas B\u00e1sicas",
+      0.033723972737789154
+    ],
+    [
+      "ibama_valor_total_multas",
+      0.029737230390310287
+    ],
+    [
+      "periodo_presidencial_encoded",
+      0.028147974982857704
+    ],
+    [
+      "ano_normalizado",
+      0.026935584843158722
+    ],
+    [
+      "ibama_valor_medio_multas",
+      0.02560642920434475
+    ],
+    [
+      "PIB per capita 2021",
+      0.015186892822384834
+    ],
+    [
+      "Popula\u00e7\u00e3o 2022",
+      0.013224238529801369
+    ],
+    [
+      "ibama_total_autos",
+      0.012649966403841972
+    ],
+    [
+      "Fundamentos do Bem-estar",
+      0.01123972237110138
+    ],
+    [
+      "ano_transicao",
+      0.009539599530398846
+    ],
+    [
+      "Oportunidades",
+      0.0036894443910568953
+    ]
+  ]
+}

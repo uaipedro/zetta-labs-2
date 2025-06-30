@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Análise Preditiva de Desmatamento: Metodologia SEMMA Completa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="analise_passo_a_passo_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analise_passo_a_passo_files/libs/quarto-html/quarto.js"></script>
+<script src="analise_passo_a_passo_files/libs/quarto-html/popper.min.js"></script>
+<script src="analise_passo_a_passo_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analise_passo_a_passo_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analise_passo_a_passo_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analise_passo_a_passo_files/libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analise_passo_a_passo_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analise_passo_a_passo_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analise_passo_a_passo_files/libs/bootstrap/bootstrap-8a79a254b8e706d3c925cde0a310d4f0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Análise Preditiva de Desmatamento: Metodologia SEMMA Completa</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>Autor:</strong> Pedro Mambelli Fernandes<br>
+<strong>Projeto:</strong> Desafio Zetta Labs 2025</p>
+<p>Este notebook demonstra a aplicação completa da metodologia SEMMA (Sample, Explore, Modify, Model, Assess) no projeto de análise preditiva de desmatamento. Cada etapa utiliza as funções e classes desenvolvidas nos scripts do projeto, proporcionando uma execução reprodutível e didática de todo o pipeline de machine learning.</p>
+<section id="metodologia-semma" class="level2">
+<h2 class="anchored" data-anchor-id="metodologia-semma">Metodologia SEMMA</h2>
+<ul>
+<li><strong>Sample (Amostragem):</strong> Carregamento e resumo inicial dos dados</li>
+<li><strong>Explore (Exploração):</strong> Análise exploratória e identificação de padrões</li>
+<li><strong>Modify (Modificação):</strong> Pré-processamento e engenharia de features</li>
+<li><strong>Model (Modelagem):</strong> Treinamento dos modelos preditivos</li>
+<li><strong>Assess (Avaliação):</strong> Análise de performance e interpretação</li>
+</ul>
+</section>
+<section id="configuração-do-ambiente" class="level2">
+<h2 class="anchored" data-anchor-id="configuração-do-ambiente">1. Configuração do Ambiente</h2>
+<p>Primeiro, configuramos o ambiente de trabalho. Adicionamos o diretório raiz do projeto ao <code>sys.path</code> para permitir a importação dos módulos customizados localizados em <code>/scripts</code>. Em seguida, importamos as bibliotecas e os scripts necessários.</p>
+<div id="cell-3" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Adiciona a raiz do projeto ao path para importar os scripts</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>module_path <span class="op">=</span> os.path.abspath(os.path.join(<span class="st">'..'</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> module_path <span class="kw">not</span> <span class="kw">in</span> sys.path:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    sys.path.append(module_path)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Importando os scripts do projeto (metodologia SEMMA)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scripts <span class="im">import</span> sampling  <span class="co"># S - Sample</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scripts <span class="im">import</span> explore   <span class="co"># E - Explore  </span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scripts <span class="im">import</span> modify    <span class="co"># M - Modify</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scripts <span class="im">import</span> model     <span class="co"># M - Model</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scripts <span class="im">import</span> assess    <span class="co"># A - Assess</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✅ Ambiente configurado com sucesso!"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📦 Módulos SEMMA importados:"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📊 sampling - Amostragem e carregamento de dados"</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   🔍 explore - Análise exploratória"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   🔧 modify - Pré-processamento e feature engineering"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   🤖 model - Treinamento de modelos"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📈 assess - Avaliação e análise de resultados"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Ambiente configurado com sucesso!
+📦 Módulos SEMMA importados:
+   📊 sampling - Amostragem e carregamento de dados
+   🔍 explore - Análise exploratória
+   🔧 modify - Pré-processamento e feature engineering
+   🤖 model - Treinamento de modelos
+   📈 assess - Avaliação e análise de resultados</code></pre>
+</div>
+</div>
+<section id="estrutura-dos-scripts-semma" class="level3">
+<h3 class="anchored" data-anchor-id="estrutura-dos-scripts-semma">Estrutura dos Scripts SEMMA</h3>
+<p>Cada script implementa uma etapa específica da metodologia:</p>
+<ul>
+<li><strong><code>sampling.py</code></strong> → Carregamento inicial e geração de resumos estatísticos</li>
+<li><strong><code>explore.py</code></strong> → Análise de qualidade e visualizações exploratórias<br>
+</li>
+<li><strong><code>modify.py</code></strong> → Limpeza, agregações e engenharia de features</li>
+<li><strong><code>model.py</code></strong> → Treinamento temporal de modelos (XGBoost, Random Forest)</li>
+<li><strong><code>assess.py</code></strong> → Avaliação comparativa e geração de insights</li>
+</ul>
+<p>O notebook organiza cada etapa em sequência, utilizando as funções e classes desenvolvidas nos scripts para demonstrar o processo de forma clara.</p>
+</section>
+</section>
+<section id="sample---amostragem-e-carregamento-dos-dados" class="level2">
+<h2 class="anchored" data-anchor-id="sample---amostragem-e-carregamento-dos-dados">2. SAMPLE - Amostragem e Carregamento dos Dados</h2>
+<p>A primeira etapa do SEMMA consiste em carregar os dados e gerar resumos iniciais para entender a estrutura de cada dataset. O script <code>sampling.py</code> automatiza esse processo para os três principais conjuntos de dados:</p>
+<ul>
+<li><strong>Desmatamento Anual:</strong> Dados históricos de desmatamento por município (formato Parquet)</li>
+<li><strong>Infrações do IBAMA:</strong> Autos de infração ambientais de 1977-2025 (múltiplos CSVs)</li>
+<li><strong>Índice de Progresso Social (IPS):</strong> Indicadores socioeconômicos dos municípios do Pará</li>
+</ul>
+<p>O script gera relatórios detalhados com estatísticas descritivas, informações sobre tipos de dados e identificação de valores ausentes.</p>
+<div id="cell-6" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔄 Executando etapa SAMPLE - Amostragem..."</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar o script de sampling completo</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>sampling.main()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✅ Etapa SAMPLE concluída!"</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📁 Relatórios gerados em: ../reports/"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - summary_ips_municipios.txt"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - summary_desmatamento_anual.txt"</span>) </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - summary_ibama_infracoes_consolidadas.txt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>🔄 Executando etapa SAMPLE - Amostragem...
+==================================================
+Iniciando a etapa de Sampling (Amostragem)...
+Relatório de resumo salvo em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\summary_ips_municipios.txt
+Relatório de resumo salvo em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\summary_desmatamento_anual.txt
+Relatório de resumo salvo em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\summary_ibama_infracoes_consolidadas.txt
+
+Etapa de Sampling concluída.
+Verifique os arquivos de resumo no diretório: reports
+
+✅ Etapa SAMPLE concluída!
+📁 Relatórios gerados em: ../reports/
+   - summary_ips_municipios.txt
+   - summary_desmatamento_anual.txt
+   - summary_ibama_infracoes_consolidadas.txt</code></pre>
+</div>
+</div>
+</section>
+<section id="explore---análise-exploratória-de-dados" class="level2">
+<h2 class="anchored" data-anchor-id="explore---análise-exploratória-de-dados">3. EXPLORE - Análise Exploratória de Dados</h2>
+<p>A segunda etapa do SEMMA foca na exploração visual e estatística dos dados. O script <code>explore.py</code> realiza:</p>
+<ul>
+<li><strong>Filtragem geográfica:</strong> Foco no estado do Pará (UF = ‘PA’)</li>
+<li><strong>Análise de qualidade:</strong> Identificação de valores ausentes por fonte de dados</li>
+<li><strong>Visualizações:</strong> Gráficos de barras mostrando a porcentagem de missing values</li>
+<li><strong>Validação temporal:</strong> Verificação da cobertura temporal dos dados (2008+)</li>
+</ul>
+<p>Esta etapa é crucial para identificar problemas de qualidade antes do pré-processamento.</p>
+<div id="cell-8" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔄 Executando etapa EXPLORE - Análise Exploratória..."</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar o script de exploração completo</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>explore.main()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✅ Etapa EXPLORE concluída!"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📁 Gráficos de qualidade dos dados gerados em: ../reports/figures/"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - missing_values_ips_pa.png"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - missing_values_desmatamento_pa.png"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - missing_values_ibama_pa.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>🔄 Executando etapa EXPLORE - Análise Exploratória...
+==================================================
+Iniciando a etapa de Explore (Exploração)...
+
+[IPS] Colunas disponíveis: ['Código IBGE', 'Município', 'UF', 'Área (km²)', 'População 2022', 'PIB per capita 2021', 'Índice de Progresso Social', 'Necessidades Humanas Básicas', 'Fundamentos do Bem-estar', 'Oportunidades', 'Nutrição e Cuidados Médicos Básicos', 'Água e Saneamento', 'Moradia', 'Segurança Pessoal', 'Acesso ao Conhecimento Básico', 'Acesso à Informação e Comunicação', 'Saúde e Bem-estar', 'Qualidade do Meio Ambiente', 'Direitos Individuais', 'Liberdades Individuais e de Escolha', 'Inclusão Social', 'Acesso à Educação Superior', 'Cobertura Vacinal (Poliomielite)', 'Hospitalizações por Condições Sensíveis à Atenção Primária', 'Mortalidade Ajustada por Condições Sensíveis à Atenção Primária', 'Mortalidade Infantil até 5 Anos', 'Subnutrição', 'Abastecimento de Água via Rede de Distribuição', 'Esgotamento Sanitário Adequado', 'Índice de Abastecimento de Água', 'Índice de Perdas de Água na Distribuição', 'Domicílios com Coleta de Resíduos Adequada', 'Domicílios com Iluminação Elétrica Adequada', 'Domicílios com Paredes Adequadas', 'Domicílios com Piso Adequado', 'Assassinatos de Jovens', 'Assassinatos de Mulheres', 'Homicídios', 'Mortes por Acidente de Transporte', 'Abandono no Ensino Fundamental', 'Abandono no Ensino Médio', 'Evasão no Ensino Médio', 'Distorção Idade-Série no Ensino Médio', 'Ideb Ensino Fundamental', 'Reprovação Escolar no Ensino Médio', 'Cobertura de Internet Móvel (4G/5G)', 'Densidade de Internet Banda Larga Fixa', 'Densidade de Telefonia Móvel', 'Qualidade de Internet Móvel', 'Consumo de Alimentos Ultraprocesados', 'Expectativa de Vida', 'Mortalidade entre 15 e 50 anos', 'Mortalidade por Doenças Crônicas Não Transmissíveis', 'Obesidade', 'Suicídios', 'Áreas Verdes Urbanas', 'Emissões de CO₂e por Habitante', 'Focos de Calor', 'Índice de Vulnerabilidade Climática dos Municípios (IVCM)', 'Supressão da Vegetação Primária e Secundária', 'Acesso a Programas de Direitos Humanos', 'Existência de Ações para Direitos de Minorias', 'Índice de Atendimento à Demanda de Justiça', 'Resposta a Processos Previdenciários', 'Resposta a Processos Familiares', 'Taxa de Congestionamento Líquido de Processos', 'Acesso à Cultura, Lazer e Esporte', 'Gravidez na Adolescência (&lt;19 anos)', 'Índice de Vulnerabilidade das Famílias do Cadastro Único (IVCAD)', 'Praças e Parques em Áreas Urbanas', 'Famílias em Situação de Rua', 'Paridade de Gênero na Câmara Municipal', 'Paridade de Negros na Câmara Municipal', 'Violência contra Indígenas', 'Violência contra Mulheres', 'Violência contra Negros', 'Empregados com Ensino Superior', 'Mulheres Empregadas com Ensino Superior', 'Nota Mediana do Enem']
+
+[IPS] Registros totais: 808. Registros para o Pará: 144
+[ips_pa] Nenhum valor ausente encontrado.
+
+[Desmatamento] Registros totais: 7304. Registros para o Pará: 2069
+[desmatamento_pa] Nenhum valor ausente encontrado.
+
+[IBAMA] Registros totais: 689189. Registros para o Pará: 67142
+[ibama_pa] Gráfico de valores ausentes salvo em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\figures\missing_values_ibama_pa.png
+
+Etapa de Explore concluída.
+Verifique os gráficos no diretório: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\figures
+
+✅ Etapa EXPLORE concluída!
+📁 Gráficos de qualidade dos dados gerados em: ../reports/figures/
+   - missing_values_ips_pa.png
+   - missing_values_desmatamento_pa.png
+   - missing_values_ibama_pa.png</code></pre>
+</div>
+</div>
+</section>
+<section id="modify---pré-processamento-e-engenharia-de-features" class="level2">
+<h2 class="anchored" data-anchor-id="modify---pré-processamento-e-engenharia-de-features">4. MODIFY - Pré-processamento e Engenharia de Features</h2>
+<p>A terceira etapa do SEMMA é a mais crítica para o sucesso dos modelos. O script <code>modify.py</code> realiza:</p>
+<section id="processamento-dos-dados" class="level3">
+<h3 class="anchored" data-anchor-id="processamento-dos-dados">Processamento dos Dados:</h3>
+<ul>
+<li><strong>Carregamento inteligente:</strong> IPS (CSV), Desmatamento (Parquet), IBAMA (múltiplos CSVs)</li>
+<li><strong>Filtragem temporal:</strong> Dados de 2008 em diante para garantir consistência</li>
+<li><strong>Filtragem geográfica:</strong> Foco no estado do Pará</li>
+<li><strong>Limpeza:</strong> Padronização de códigos IBGE, tratamento de valores ausentes</li>
+</ul>
+</section>
+<section id="agregações-estratégicas" class="level3">
+<h3 class="anchored" data-anchor-id="agregações-estratégicas">Agregações Estratégicas:</h3>
+<ul>
+<li><strong>IBAMA por município/ano:</strong> Total de autos, valor de multas, infrações de flora</li>
+<li><strong>Interpolação de IPS:</strong> Preenchimento temporal usando interpolação linear</li>
+</ul>
+</section>
+<section id="features-temporais" class="level3">
+<h3 class="anchored" data-anchor-id="features-temporais">Features Temporais:</h3>
+<ul>
+<li><strong>Lags:</strong> Desmatamento do ano anterior (<code>desmatamento_lag1</code>)</li>
+<li><strong>Médias móveis:</strong> Tendência de 3 anos (<code>desmatamento_ma3</code>)</li>
+<li><strong>Períodos presidenciais:</strong> Lula, Dilma, Temer, Bolsonaro (codificado)</li>
+<li><strong>Anos de transição:</strong> Marcadores para mudanças de governo</li>
+</ul>
+<div id="cell-10" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔄 Executando etapa MODIFY - Pré-processamento..."</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar o script de modificação completo</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>modify.main()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✅ Etapa MODIFY concluída!"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📁 Tabelas analíticas geradas em: ../reports/processed/"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - analytical_base_table.parquet: Tabela completa com todas as features"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - analytical_table_tabular.parquet: Para modelos tabulares (RF, XGBoost)"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - analytical_table_temporal.parquet: Para modelos temporais (LSTM, GRU)"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - data_summary.txt: Resumo dos dados processados"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>🔄 Executando etapa MODIFY - Pré-processamento...
+==================================================
+Iniciando a etapa de Modify (Modificação)...
+Período de análise: 2008 em diante
+Estado: PA
+--------------------------------------------------
+1. Carregando dados...
+IPS: 144 municípios do Pará carregados
+Desmatamento: 2069 registros do Pará de 2008 em diante
+IBAMA: 37544 registros do Pará de 2008 em diante
+
+2. Processando dados do IBAMA...
+IBAMA agregado: 1609 registros município-ano
+
+3. Criando tabela analítica base...
+Após interpolação do IPS: 2069 registros
+Após merge com IBAMA: 2069 registros
+
+4. Adicionando features temporais...
+
+5. Preparando encodings para ML...
+
+6. Salvando tabelas analíticas...
+Tabela analítica base salva: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed\analytical_base_table.parquet
+Tabela para modelos tabulares salva: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed\analytical_table_tabular.parquet
+Tabela para modelos temporais salva: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed\analytical_table_temporal.parquet
+Resumo salvo: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed\data_summary.txt
+
+Etapa de Modify concluída!
+Verifique os arquivos processados em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed
+
+Arquivos gerados:
+- analytical_base_table.parquet: Tabela completa com todas as features
+- analytical_table_tabular.parquet: Para modelos tabulares (RF, XGBoost)
+- analytical_table_temporal.parquet: Para modelos temporais (LSTM, GRU)
+- data_summary.txt: Resumo dos dados processados
+
+✅ Etapa MODIFY concluída!
+📁 Tabelas analíticas geradas em: ../reports/processed/
+   - analytical_base_table.parquet: Tabela completa com todas as features
+   - analytical_table_tabular.parquet: Para modelos tabulares (RF, XGBoost)
+   - analytical_table_temporal.parquet: Para modelos temporais (LSTM, GRU)
+   - data_summary.txt: Resumo dos dados processados</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="model---treinamento-dos-modelos-preditivos" class="level2">
+<h2 class="anchored" data-anchor-id="model---treinamento-dos-modelos-preditivos">5. MODEL - Treinamento dos Modelos Preditivos</h2>
+<p>A quarta etapa do SEMMA envolve o treinamento de modelos de machine learning. A estratégia implementada é de <strong>modelagem temporal por períodos</strong>, onde cada modelo é treinado com dados históricos para prever o próximo ano.</p>
+<section id="estratégia-de-modelagem" class="level3">
+<h3 class="anchored" data-anchor-id="estratégia-de-modelagem">Estratégia de Modelagem:</h3>
+<ul>
+<li><strong>Períodos de treinamento:</strong> 2013-2023 (11 modelos, um para cada ano)</li>
+<li><strong>Modelos implementados:</strong> XGBoost e Random Forest</li>
+<li><strong>Validação:</strong> Walk-forward temporal (sem vazamento de dados futuros)</li>
+<li><strong>Arquitetura modular:</strong> Classes especializadas para cada algoritmo</li>
+</ul>
+</section>
+<section id="pipeline-de-treinamento" class="level3">
+<h3 class="anchored" data-anchor-id="pipeline-de-treinamento">Pipeline de Treinamento:</h3>
+<ol type="1">
+<li><strong>Carregamento:</strong> Tabela analítica processada</li>
+<li><strong>Preparação:</strong> Seleção de features e definição do target</li>
+<li><strong>Treinamento:</strong> Ajuste bayesiano dos hiperparâmetros com Optuna</li>
+<li><strong>Predição:</strong> Geração de predições para o ano de teste</li>
+<li><strong>Persistência:</strong> Salvar modelos, metadados e predições</li>
+</ol>
+</section>
+<section id="outputs-gerados" class="level3">
+<h3 class="anchored" data-anchor-id="outputs-gerados">Outputs Gerados:</h3>
+<ul>
+<li><strong>Modelos treinados:</strong> Arquivos <code>.pkl</code> para cada período/algoritmo</li>
+<li><strong>Metadados:</strong> Configurações e feature importance (JSON)</li>
+<li><strong>Predições:</strong> Valores reais vs.&nbsp;previstos (Parquet)</li>
+<li><strong>Métricas:</strong> R², RMSE, MAE por período</li>
+</ul>
+<div id="cell-12" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔄 Executando etapa MODEL - Treinamento dos Modelos..."</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar o pipeline de modelagem completo</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>model.main()</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✅ Etapa MODEL concluída!"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📁 Resultados de modelagem gerados em:"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📂 ../reports/models/ - Modelos treinados por período"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📂 ../reports/results/ - Métricas de performance"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📂 ../reports/checkpoints/ - Consolidação de todos os resultados"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">📊 Para cada período (2013-2023):"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - </span><span class="sc">{modelo}</span><span class="st">_model.pkl: Modelo treinado"</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - </span><span class="sc">{modelo}</span><span class="st">_metadata.json: Configurações e feature importance"</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   - </span><span class="sc">{modelo}</span><span class="st">_predictions.parquet: Predições vs. valores reais"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>🔄 Executando etapa MODEL - Treinamento dos Modelos...
+==================================================
+🔧 Executando pipeline de modelagem refatorado...
+📁 Estrutura modular:
+   ├── models/base.py - Funcionalidades comuns
+   ├── models/xgboost_model.py - XGBoost
+   ├── models/random_forest_model.py - Random Forest
+   └── models/trainer.py - Orquestrador principal
+   └── scripts/assess.py - Análise de resultados
+
+Iniciando pipeline de modelagem modular...
+ID da execução: 20250630_181342
+============================================================
+0. Verificando execuções anteriores...
+Checkpoint carregado: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\checkpoints\all_results_20250629_204235.pkl
+Carregados 22 resultados existentes
+Encontrados 22 resultados de execuções anteriores
+Experimentos já completados: 22
+
+1. Carregando dados...
+Dados tabulares: (2069, 21)
+Dados temporais: (2069, 23)
+
+2. Criando splits walk-forward...
+Criados 11 splits walk-forward
+
+3. Treinando modelos tabulares (11 períodos)...
+
+Período 1/11: Treino até 2012.0, Teste 2013.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 2/11: Treino até 2013.0, Teste 2014.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 3/11: Treino até 2014.0, Teste 2015.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 4/11: Treino até 2015.0, Teste 2016.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 5/11: Treino até 2016.0, Teste 2017.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 6/11: Treino até 2017.0, Teste 2018.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 7/11: Treino até 2018.0, Teste 2019.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 8/11: Treino até 2019.0, Teste 2020.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 9/11: Treino até 2020.0, Teste 2021.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 10/11: Treino até 2021.0, Teste 2022.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+Período 11/11: Treino até 2022.0, Teste 2023.0
+  xgboost já treinado para este período - pulando
+  random_forest já treinado para este período - pulando
+
+5. Salvando resultados finais...
+
+============================================================
+RESUMO DOS RESULTADOS
+============================================================
+                  rmse              mae              r2        
+                  mean      std    mean     std    mean     std
+model_type                                                     
+random_forest  22.2485  12.9824  6.4851  2.5099  0.8607  0.0858
+xgboost        20.2573   8.3364  6.5210  1.9521  0.8771  0.0758
+
+Total de experimentos completados: 22
+Modelos únicos treinados: 2
+Períodos cobertos: 11
+
+Melhor RMSE: random_forest (período 3) : 9.8141
+Melhor R²: random_forest (período 10) : 0.9859
+
+Resultados salvos em: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\results\model_results_20250630_181342.csv
+Pipeline de modelagem concluído!
+
+✅ Etapa MODEL concluída!
+📁 Resultados de modelagem gerados em:
+   📂 ../reports/models/ - Modelos treinados por período
+   📂 ../reports/results/ - Métricas de performance
+   📂 ../reports/checkpoints/ - Consolidação de todos os resultados
+
+📊 Para cada período (2013-2023):
+   - {modelo}_model.pkl: Modelo treinado
+   - {modelo}_metadata.json: Configurações e feature importance
+   - {modelo}_predictions.parquet: Predições vs. valores reais</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="assess---avaliação-e-análise-dos-resultados" class="level2">
+<h2 class="anchored" data-anchor-id="assess---avaliação-e-análise-dos-resultados">6. ASSESS - Avaliação e Análise dos Resultados</h2>
+<p>A quinta e última etapa do SEMMA é focada na avaliação objetiva dos modelos e geração de insights acionáveis. O script <code>assess.py</code> realiza uma análise abrangente da performance.</p>
+<section id="análises-realizadas" class="level3">
+<h3 class="anchored" data-anchor-id="análises-realizadas">Análises Realizadas:</h3>
+<section id="comparação-temporal-de-performance" class="level4">
+<h4 class="anchored" data-anchor-id="comparação-temporal-de-performance">1. <strong>Comparação Temporal de Performance</strong></h4>
+<ul>
+<li><strong>Gráfico:</strong> Evolução do R² e RMSE ao longo dos anos de teste</li>
+<li><strong>Insight:</strong> Identificação de períodos onde os modelos têm melhor/pior performance</li>
+<li><strong>Output:</strong> <code>model_comparison_timeline.png</code></li>
+</ul>
+</section>
+<section id="importância-das-features" class="level4">
+<h4 class="anchored" data-anchor-id="importância-das-features">2. <strong>Importância das Features</strong></h4>
+<ul>
+<li><strong>Gráfico:</strong> Top 10 features mais importantes para cada modelo</li>
+<li><strong>Análise:</strong> Comparação entre XGBoost e Random Forest</li>
+<li><strong>Output:</strong> <code>feature_importance_comparison.png</code></li>
+</ul>
+</section>
+<section id="evolução-temporal-real-vs.-previsto" class="level4">
+<h4 class="anchored" data-anchor-id="evolução-temporal-real-vs.-previsto">3. <strong>Evolução Temporal: Real vs.&nbsp;Previsto</strong></h4>
+<ul>
+<li><strong>Gráfico:</strong> Séries temporais com destaque para mudanças políticas</li>
+<li><strong>Contexto:</strong> Períodos de suspensão do PPCDAm (2019-2022)</li>
+<li><strong>Output:</strong> <code>temporal_evolution_real_vs_predicted.png</code></li>
+</ul>
+</section>
+<section id="análise-de-anos-críticos" class="level4">
+<h4 class="anchored" data-anchor-id="análise-de-anos-críticos">4. <strong>Análise de Anos Críticos</strong></h4>
+<ul>
+<li><strong>Foco:</strong> Performance específica em 2019 (início Bolsonaro) e 2023 (retorno Lula)</li>
+<li><strong>Insight:</strong> Como os modelos se comportam durante mudanças políticas</li>
+<li><strong>Output:</strong> <code>critical_years_analysis.png</code></li>
+</ul>
+</section>
+</section>
+<section id="dados-estruturados-para-dashboard" class="level3">
+<h3 class="anchored" data-anchor-id="dados-estruturados-para-dashboard">Dados Estruturados para Dashboard:</h3>
+<p>Todos os gráficos geram também tabelas em formato Parquet para alimentar o dashboard interativo.</p>
+<div id="cell-14" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔄 Executando etapa ASSESS - Avaliação dos Modelos..."</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Executar a análise completa de avaliação</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>assess.main()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✅ Etapa ASSESS concluída!"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📁 Análises geradas em: ../reports/figures/"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📊 model_comparison_timeline.png: Comparação temporal R² e RMSE"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📊 feature_importance_comparison.png: Top 10 features por modelo"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📊 temporal_evolution_real_vs_predicted.png: Real vs. Previsto com contexto político"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📊 critical_years_analysis.png: Performance em anos críticos (2019, 2023)"</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">💾 Dados estruturados em: ../reports/processed/"</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📋 model_comparison_data.parquet"</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📋 feature_importance_data.parquet"</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📋 temporal_evolution_data.parquet"</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📋 critical_years_data.parquet"</span>)</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"   📋 model_summary.parquet"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>🔄 Executando etapa ASSESS - Avaliação dos Modelos...
+==================================================
+
+🎯 ANÁLISE FOCADA DE MODELOS
+========================================
+📊 Carregando: all_results_20250629_204235.pkl
+📈 22 resultados | 2,814 predições
+
+🔍 Gerando análises...
+✅ Comparação temporal salva: model_comparison_timeline.png
+✅ random_forest: 11 períodos processados, 18 features
+✅ xgboost: 11 períodos processados, 18 features
+✅ Importância das features salva: feature_importance_comparison.png
+✅ Evolução temporal salva: temporal_evolution_real_vs_predicted.png
+✅ Análise de anos críticos salva: critical_years_analysis.png
+
+📊 RESUMO DOS MODELOS:
+==================================================
+Random Forest:
+  R² médio: 0.861 (±0.086) - Ranking: #2
+  RMSE médio: 22.2 (±13.0) - Ranking: #2
+
+Xgboost:
+  R² médio: 0.877 (±0.076) - Ranking: #1
+  RMSE médio: 20.3 (±8.3) - Ranking: #1
+
+
+✅ Análise concluída!
+📁 Gráficos: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\figures
+💾 Dados: C:\Users\pedro\Documents\Dev\zetta-labs-2\reports\processed
+
+✅ Etapa ASSESS concluída!
+📁 Análises geradas em: ../reports/figures/
+   📊 model_comparison_timeline.png: Comparação temporal R² e RMSE
+   📊 feature_importance_comparison.png: Top 10 features por modelo
+   📊 temporal_evolution_real_vs_predicted.png: Real vs. Previsto com contexto político
+   📊 critical_years_analysis.png: Performance em anos críticos (2019, 2023)
+
+💾 Dados estruturados em: ../reports/processed/
+   📋 model_comparison_data.parquet
+   📋 feature_importance_data.parquet
+   📋 temporal_evolution_data.parquet
+   📋 critical_years_data.parquet
+   📋 model_summary.parquet</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="visualização-dos-resultados" class="level2">
+<h2 class="anchored" data-anchor-id="visualização-dos-resultados">7. Visualização dos Resultados</h2>
+<p>Após a execução completa do pipeline, você pode examinar os resultados gerados. Aqui estão alguns exemplos de como acessar e interpretar os dados processados.</p>
+<div id="cell-16" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregamento e exibição de resultados exemplo</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>REPORTS_DIR <span class="op">=</span> Path(<span class="st">"../reports"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>PROCESSED_DIR <span class="op">=</span> REPORTS_DIR <span class="op">/</span> <span class="st">"processed"</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>FIGURES_DIR <span class="op">=</span> REPORTS_DIR <span class="op">/</span> <span class="st">"figures"</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"📊 RESULTADOS DISPONÍVEIS:"</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">40</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificar se os diretórios existem</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> PROCESSED_DIR.exists():</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"💾 Dados processados:"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> <span class="bu">sorted</span>(PROCESSED_DIR.glob(<span class="st">"*.parquet"</span>)):</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        size_mb <span class="op">=</span> <span class="bu">file</span>.stat().st_size <span class="op">/</span> (<span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   📋 </span><span class="sc">{</span><span class="bu">file</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>size_mb<span class="sc">:.1f}</span><span class="ss"> MB)"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">📄 Relatórios:"</span>)  </span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> <span class="bu">sorted</span>(PROCESSED_DIR.glob(<span class="st">"*.txt"</span>)):</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   📝 </span><span class="sc">{</span><span class="bu">file</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> FIGURES_DIR.exists():</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">📊 Visualizações:"</span>)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> <span class="bu">sorted</span>(FIGURES_DIR.glob(<span class="st">"*.png"</span>)):</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        size_kb <span class="op">=</span> <span class="bu">file</span>.stat().st_size <span class="op">/</span> <span class="dv">1024</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"   🖼️  </span><span class="sc">{</span><span class="bu">file</span><span class="sc">.</span>name<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>size_kb<span class="sc">:.0f}</span><span class="ss"> KB)"</span>)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemplo: Carregar resumo dos modelos se disponível</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (PROCESSED_DIR <span class="op">/</span> <span class="st">"model_summary.parquet"</span>).exists():</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">🤖 RESUMO DOS MODELOS:"</span>)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">30</span>)</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    model_summary <span class="op">=</span> pd.read_parquet(PROCESSED_DIR <span class="op">/</span> <span class="st">"model_summary.parquet"</span>)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _, row <span class="kw">in</span> model_summary.iterrows():</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        model_name <span class="op">=</span> row[<span class="st">'model_type'</span>].replace(<span class="st">'_'</span>, <span class="st">' '</span>).title()</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>model_name<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  📈 R² médio: </span><span class="sc">{</span>row[<span class="st">'r2_mean'</span>]<span class="sc">:.3f}</span><span class="ss"> (ranking: #</span><span class="sc">{</span>row[<span class="st">'r2_rank'</span>]<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  📉 RMSE médio: </span><span class="sc">{</span>row[<span class="st">'rmse_mean'</span>]<span class="sc">:.1f}</span><span class="ss"> km² (ranking: #</span><span class="sc">{</span>row[<span class="st">'rmse_rank'</span>]<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>()</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">⚠️  Execute primeiro o pipeline completo para ver os resultados."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 RESULTADOS DISPONÍVEIS:
+========================================
+💾 Dados processados:
+   📋 analytical_base_table.parquet (0.1 MB)
+   📋 analytical_table_tabular.parquet (0.1 MB)
+   📋 analytical_table_temporal.parquet (0.1 MB)
+   📋 critical_years_data.parquet (0.0 MB)
+   📋 executive_summary.parquet (0.0 MB)
+   📋 feature_importance_analysis.parquet (0.0 MB)
+   📋 feature_importance_data.parquet (0.0 MB)
+   📋 model_comparison_data.parquet (0.0 MB)
+   📋 model_performance_analysis.parquet (0.0 MB)
+   📋 model_summary.parquet (0.0 MB)
+   📋 performance_statistics.parquet (0.0 MB)
+   📋 prediction_quality_metrics.parquet (0.0 MB)
+   📋 predictions_analysis_sample.parquet (0.1 MB)
+   📋 temporal_evolution_data.parquet (0.0 MB)
+
+📄 Relatórios:
+   📝 data_summary.txt
+
+📊 Visualizações:
+   🖼️  critical_years_analysis.png (118 KB)
+   🖼️  feature_importance_comparison.png (250 KB)
+   🖼️  missing_values_ibama_pa.png (102 KB)
+   🖼️  model_comparison_timeline.png (284 KB)
+   🖼️  temporal_evolution_real_vs_predicted.png (556 KB)
+
+🤖 RESUMO DOS MODELOS:
+------------------------------
+Random Forest:
+  📈 R² médio: 0.861 (ranking: #2)
+  📉 RMSE médio: 22.2 km² (ranking: #2)
+
+Xgboost:
+  📈 R² médio: 0.877 (ranking: #1)
+  📉 RMSE médio: 20.3 km² (ranking: #1)
+</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusão" class="level2">
+<h2 class="anchored" data-anchor-id="conclusão">Conclusão</h2>
+<p>Este notebook apresenta a execução da metodologia SEMMA para análise preditiva de desmatamento, com as etapas implementadas em scripts separados (<code>sampling.py</code>, <code>explore.py</code>, <code>modify.py</code>, <code>model.py</code>, <code>assess.py</code>).</p>
+<section id="pontos-da-abordagem" class="level3">
+<h3 class="anchored" data-anchor-id="pontos-da-abordagem">Pontos da abordagem:</h3>
+<ul>
+<li><strong>Modularização:</strong> Cada etapa pode ser executada isoladamente.</li>
+<li><strong>Validação temporal:</strong> Utiliza walk-forward para evitar vazamento de dados.</li>
+<li><strong>Comparação de modelos:</strong> XGBoost e Random Forest avaliados com as mesmas métricas.</li>
+<li><strong>Análise de variáveis:</strong> Feature importance e gráficos para interpretação.</li>
+</ul>
+</section>
+<section id="próximos-passos" class="level3">
+<h3 class="anchored" data-anchor-id="próximos-passos">Próximos passos:</h3>
+<ol type="1">
+<li>Para visualizar os principais resultados, execute <code>streamlit run ../dashboard.py</code>.</li>
+<li>Os gráficos estão em <code>../reports/figures/</code>.</li>
+<li>Os dados processados estão em <code>../reports/processed/</code> (formato Parquet).</li>
+</ol>
+<p>Para rodar o pipeline novamente, basta executar as células do notebook em ordem.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
